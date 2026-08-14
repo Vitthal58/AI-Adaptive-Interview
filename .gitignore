@@ -1,0 +1,230 @@
+# ==========================================
+# AI Interviewer - Git Ignore
+# ==========================================
+
+
+# ------------------------------------------
+# Python
+# ------------------------------------------
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.so
+
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+
+# ------------------------------------------
+# Virtual Environment
+# ------------------------------------------
+
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+
+# ------------------------------------------
+# Environment Variables / Secrets
+# ------------------------------------------
+
+.env
+.env.*
+!.env.example
+
+
+# ------------------------------------------
+# FastAPI / Uvicorn
+# ------------------------------------------
+
+*.log
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+
+# ------------------------------------------
+# Node / React / Vite
+# ------------------------------------------
+
+node_modules/
+
+dist/
+build/
+
+.vite/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# ------------------------------------------
+# React / Vite Environment Files
+# ------------------------------------------
+
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+
+# ------------------------------------------
+# Backend Environment Files
+# ------------------------------------------
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+
+# ------------------------------------------
+# PostgreSQL / Database
+# ------------------------------------------
+
+*.sql.backup
+*.dump
+
+
+# ------------------------------------------
+# Uploaded Resume Files
+# ------------------------------------------
+
+backend/uploads/
+uploads/
+
+*.pdf
+*.doc
+*.docx
+
+
+# ------------------------------------------
+# RAG / Vector Database
+# ------------------------------------------
+
+# Chroma database
+chroma_db/
+**/chroma_db/
+
+# Local vector database files
+*.sqlite
+*.sqlite3
+
+
+# ------------------------------------------
+# Knowledge Base Generated Files
+# ------------------------------------------
+
+# Ignore generated/indexed files
+knowledge_base/chroma_db/
+backend/knowledge_base/chroma_db/
+
+# If PDFs/books are private or large
+# uncomment if you don't want books in GitHub:
+# backend/knowledge_base/books/
+
+
+# ------------------------------------------
+# Machine Learning Generated Files
+# ------------------------------------------
+
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.pt
+*.pth
+*.ckpt
+
+
+# ------------------------------------------
+# OS Files
+# ------------------------------------------
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+
+# ------------------------------------------
+# IDE / Editors
+# ------------------------------------------
+
+.vscode/
+.idea/
+
+*.swp
+*.swo
+
+# VS Code local history
+.history/
+
+
+# ------------------------------------------
+# Temporary Files
+# ------------------------------------------
+
+*.tmp
+*.temp
+*.cache
+
+temp/
+tmp/
+
+
+# ------------------------------------------
+# Test / Coverage
+# ------------------------------------------
+
+.coverage
+.coverage.*
+.pytest_cache/
+.tox/
+.nox/
+
+
+# ------------------------------------------
+# TypeScript / JavaScript
+# ------------------------------------------
+
+*.tsbuildinfo
+
+
+# ------------------------------------------
+# Miscellaneous
+# ------------------------------------------
+
+.DS_Store
+*.bak
+*.orig
