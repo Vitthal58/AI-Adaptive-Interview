@@ -10,9 +10,7 @@ from langchain_text_splitters import (
 
 from langchain_chroma import Chroma
 
-from langchain_huggingface import (
-    HuggingFaceEmbeddings
-)
+from langchain_community.embeddings import FastEmbedEmbeddings
 
 
 # ============================================================
@@ -38,9 +36,7 @@ VECTOR_DB_PATH = (
 # EMBEDDING MODEL
 # ============================================================
 
-EMBEDDING_MODEL = (
-    "sentence-transformers/all-MiniLM-L6-v2"
-)
+EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 
 
 # ============================================================
@@ -66,7 +62,7 @@ ROLE_FOLDERS = {
 
 def create_embeddings():
 
-    return HuggingFaceEmbeddings(
+    return FastEmbedEmbeddings(
         model_name=EMBEDDING_MODEL
     )
 
