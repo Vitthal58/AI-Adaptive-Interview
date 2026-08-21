@@ -1,4 +1,5 @@
 import json
+import re
 
 from groq import Groq
 
@@ -8,6 +9,32 @@ from app.config import settings
 client = Groq(
     api_key=settings.GROQ_API_KEY
 )
+
+
+def parse_evaluation_response(content: str) -> dict:
+
+    cleaned_content = content.strip()
+
+    if cleaned_content.startswith("```"):
+        cleaned_content = re.sub(
+            r"^```(?:json)?\s*|\s*```$",
+            "",
+            cleaned_content,
+            flags=re.IGNORECASE
+        ).strip()
+
+    try:
+        return json.loads(cleaned_content)
+    except json.JSONDecodeError:
+        start = cleaned_content.find("{")
+        end = cleaned_content.rfind("}")
+
+        if start < 0 or end <= start:
+            raise ValueError(
+                "Groq returned an invalid evaluation response"
+            )
+
+        return json.loads(cleaned_content[start:end + 1])
 
 
 def evaluate_answer(
@@ -77,26 +104,38 @@ Use exactly this structure:
 The score must be between 0 and 10.
 """
 
-    response = client.chat.completions.create(
-        model=settings.GROQ_MODEL,
-        temperature=0.2,
-        response_format={
-            "type": "json_object"
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are an expert technical "
+                "interviewer and evaluator."
+            )
         },
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are an expert technical "
-                    "interviewer and evaluator."
-                )
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+
+    try:
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            temperature=0.2,
+            response_format={
+                "type": "json_object"
             },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
+            messages=messages
+        )
+    except Exception as error:
+        if "json_validate_failed" not in str(error):
+            raise
+
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            temperature=0.2,
+            messages=messages
+        )
 
     content = (
         response
@@ -105,4 +144,4 @@ The score must be between 0 and 10.
         .content
     )
 
-    return json.loads(content)
+    return parse_evaluation_response(content)
