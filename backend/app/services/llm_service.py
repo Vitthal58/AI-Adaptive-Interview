@@ -34,14 +34,15 @@ def parse_json_response(content: str) -> dict:
         return json.loads(cleaned_content)
     except json.JSONDecodeError:
         start = cleaned_content.find("{")
-        end = cleaned_content.rfind("}")
 
-        if start < 0 or end <= start:
+        if start < 0:
             raise ValueError(
                 "Groq returned an invalid JSON response"
             )
 
-        return json.loads(cleaned_content[start:end + 1])
+        return json.JSONDecoder().raw_decode(
+            cleaned_content[start:]
+        )[0]
 
 
 def request_json(messages: list[dict], temperature: float) -> dict:
