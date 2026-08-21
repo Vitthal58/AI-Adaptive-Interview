@@ -1,4 +1,5 @@
 import json
+import re
 
 from groq import Groq
 
@@ -15,6 +16,56 @@ client = Groq(
 
 
 MODEL_NAME = settings.GROQ_MODEL
+
+
+def parse_json_response(content: str) -> dict:
+
+    cleaned_content = content.strip()
+
+    if cleaned_content.startswith("```"):
+        cleaned_content = re.sub(
+            r"^```(?:json)?\s*|\s*```$",
+            "",
+            cleaned_content,
+            flags=re.IGNORECASE
+        ).strip()
+
+    try:
+        return json.loads(cleaned_content)
+    except json.JSONDecodeError:
+        start = cleaned_content.find("{")
+        end = cleaned_content.rfind("}")
+
+        if start < 0 or end <= start:
+            raise ValueError(
+                "Groq returned an invalid JSON response"
+            )
+
+        return json.loads(cleaned_content[start:end + 1])
+
+
+def request_json(messages: list[dict], temperature: float) -> dict:
+
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=temperature,
+            response_format={"type": "json_object"},
+            messages=messages
+        )
+    except Exception as error:
+        if "json_validate_failed" not in str(error):
+            raise
+
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=temperature,
+            messages=messages
+        )
+
+    return parse_json_response(
+        response.choices[0].message.content
+    )
 
 
 # ============================================================
@@ -133,16 +184,7 @@ hard
     # Groq request
     # --------------------------------------------------------
 
-    response = client.chat.completions.create(
-
-        model=MODEL_NAME,
-
-        temperature=0.3,
-
-        response_format={
-            "type": "json_object"
-        },
-
+    return request_json(
         messages=[
             {
                 "role": "system",
@@ -159,22 +201,9 @@ hard
 
                 "content": prompt
             }
-        ]
+        ],
+        temperature=0.3
     )
-
-
-    # --------------------------------------------------------
-    # Parse response
-    # --------------------------------------------------------
-
-    content = (
-        response
-        .choices[0]
-        .message
-        .content
-    )
-
-    return json.loads(content)
 
 
 # ============================================================
@@ -321,16 +350,7 @@ hard
     # Groq request
     # --------------------------------------------------------
 
-    response = client.chat.completions.create(
-
-        model=MODEL_NAME,
-
-        temperature=0.3,
-
-        response_format={
-            "type": "json_object"
-        },
-
+    return request_json(
         messages=[
 
             {
@@ -348,23 +368,9 @@ hard
                 "content": prompt
             }
 
-        ]
+        ],
+        temperature=0.3
     )
-
-
-    # --------------------------------------------------------
-    # Parse response
-    # --------------------------------------------------------
-
-    content = (
-        response
-        .choices[0]
-        .message
-        .content
-    )
-
-    return json.loads(content)
-
 
 # ============================================================
 # Generate Final Interview Report
@@ -476,16 +482,7 @@ Return only JSON.
     # Groq request
     # --------------------------------------------------------
 
-    response = client.chat.completions.create(
-
-        model=MODEL_NAME,
-
-        temperature=0.2,
-
-        response_format={
-            "type": "json_object"
-        },
-
+    return request_json(
         messages=[
 
             {
@@ -504,7 +501,8 @@ Return only JSON.
                 "content": prompt
             }
 
-        ]
+        ],
+        temperature=0.2
     )
 
 
@@ -512,11 +510,3 @@ Return only JSON.
     # Parse response
     # --------------------------------------------------------
 
-    content = (
-        response
-        .choices[0]
-        .message
-        .content
-    )
-
-    return json.loads(content)
