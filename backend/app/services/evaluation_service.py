@@ -78,7 +78,7 @@ The score must be between 0 and 10.
 """
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=settings.GROQ_MODEL,
         temperature=0.2,
         response_format={
             "type": "json_object"

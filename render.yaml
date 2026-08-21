@@ -11,6 +11,8 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: GROQ_MODEL
+        value: meta-llama/llama-4-scout-17b-16e-instruct
       - key: CORS_ORIGINS
         sync: false
       - key: RAG_MODE
