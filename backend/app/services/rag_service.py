@@ -1,5 +1,7 @@
 from pathlib import Path
 from functools import lru_cache
+import os
+import re
 
 from langchain_community.document_loaders import (
     PyMuPDFLoader
@@ -10,6 +12,7 @@ from langchain_text_splitters import (
 )
 
 from langchain_chroma import Chroma
+from langchain_core.documents import Document
 
 from langchain_community.embeddings import FastEmbedEmbeddings
 
@@ -244,8 +247,6 @@ def search_knowledge_base(
     k: int = 5
 ):
 
-    vector_db = get_vector_database()
-
     normalized_role = normalize_role(
         role
     )
@@ -257,6 +258,15 @@ def search_knowledge_base(
     print(
         f"RAG query: {query}"
     )
+
+    if os.getenv("RAG_MODE", "semantic").lower() == "lexical":
+        return lexical_search(
+            query=query,
+            role=normalized_role,
+            k=k
+        )
+
+    vector_db = get_vector_database()
 
     results = (
         vector_db
@@ -282,6 +292,50 @@ def search_knowledge_base(
     )
 
     return results
+
+
+def lexical_search(
+    query: str,
+    role: str,
+    k: int
+):
+
+    collection = get_collection_without_embeddings()
+
+    records = collection.get(
+        where={"role": role},
+        include=["documents", "metadatas"]
+    )
+
+    query_terms = set(re.findall(r"[a-zA-Z0-9]+", query.lower()))
+    scored_documents = []
+
+    for content, metadata in zip(
+        records.get("documents", []),
+        records.get("metadatas", [])
+    ):
+        document_terms = set(
+            re.findall(r"[a-zA-Z0-9]+", (content or "").lower())
+        )
+        score = len(query_terms & document_terms)
+        if score:
+            scored_documents.append((score, content, metadata))
+
+    scored_documents.sort(key=lambda item: item[0], reverse=True)
+
+    return [
+        Document(page_content=content, metadata=metadata or {})
+        for _, content, metadata in scored_documents[:k]
+    ]
+
+
+@lru_cache(maxsize=1)
+def get_collection_without_embeddings():
+
+    return Chroma(
+        persist_directory=str(VECTOR_DB_PATH),
+        collection_name="interview_knowledge"
+    )
 
 
 # ============================================================
