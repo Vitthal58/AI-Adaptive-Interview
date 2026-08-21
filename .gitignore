@@ -142,6 +142,9 @@ chroma_db/
 knowledge_base/chroma_db/
 backend/knowledge_base/chroma_db/
 
+!backend/knowledge_base/chroma_db/
+!backend/knowledge_base/chroma_db/**
+
 # If PDFs/books are private or large
 # uncomment if you don't want books in GitHub:
 # backend/knowledge_base/books/

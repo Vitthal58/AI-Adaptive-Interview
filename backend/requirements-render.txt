@@ -1,0 +1,13 @@
+fastapi==0.141.1
+uvicorn==0.52.0
+python-multipart==0.0.32
+python-dotenv==1.2.2
+SQLAlchemy==2.0.51
+psycopg2-binary==2.9.12
+pymupdf==1.28.2
+groq==1.6.0
+chromadb==1.5.9
+fastembed==0.8.0
+langchain-chroma==1.1.0
+langchain-community==0.4.2
+langchain-text-splitters==1.1.2

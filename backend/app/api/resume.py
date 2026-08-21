@@ -1,4 +1,4 @@
-import fitz
+import pymupdf
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
@@ -34,7 +34,7 @@ async def upload_resume(
     file_content = await file.read()
 
     try:
-        pdf = fitz.open(
+        pdf = pymupdf.open(
             stream=file_content,
             filetype="pdf"
         )

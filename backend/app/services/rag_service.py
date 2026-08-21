@@ -1,4 +1,5 @@
 from pathlib import Path
+from functools import lru_cache
 
 from langchain_community.document_loaders import (
     PyMuPDFLoader
@@ -60,6 +61,7 @@ ROLE_FOLDERS = {
 # CREATE EMBEDDINGS
 # ============================================================
 
+@lru_cache(maxsize=1)
 def create_embeddings():
 
     return FastEmbedEmbeddings(
@@ -200,6 +202,7 @@ def build_vector_database():
 # GET EXISTING VECTOR DATABASE
 # ============================================================
 
+@lru_cache(maxsize=1)
 def get_vector_database():
 
     embeddings = create_embeddings()
