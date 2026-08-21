@@ -45,27 +45,54 @@ def parse_json_response(content: str) -> dict:
         )[0]
 
 
-def request_json(messages: list[dict], temperature: float) -> dict:
+def request_json(
+    messages: list[dict],
+    temperature: float,
+    require_question: bool = False
+) -> dict:
 
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            temperature=temperature,
-            response_format={"type": "json_object"},
-            messages=messages
+    request_messages = list(messages)
+
+    for attempt in range(2):
+        try:
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                temperature=temperature,
+                response_format={"type": "json_object"},
+                messages=request_messages
+            )
+        except Exception as error:
+            if "json_validate_failed" not in str(error):
+                raise
+
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                temperature=temperature,
+                messages=request_messages
+            )
+
+        result = parse_json_response(
+            response.choices[0].message.content
         )
-    except Exception as error:
-        if "json_validate_failed" not in str(error):
-            raise
 
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            temperature=temperature,
-            messages=messages
-        )
+        question = result.get("question")
+        if require_question and (
+            not isinstance(question, str)
+            or question.strip() in {"", "..."}
+        ):
+            request_messages.append({
+                "role": "user",
+                "content": (
+                    "Generate a complete real technical question now. "
+                    "Never use placeholder text such as ... or TODO."
+                )
+            })
+            continue
 
-    return parse_json_response(
-        response.choices[0].message.content
+        return result
+
+    raise ValueError(
+        "Groq returned a placeholder instead of a real question"
     )
 
 
@@ -162,7 +189,7 @@ RULES:
 Return exactly this structure:
 
 {{
-    "question": "...",
+    "question": "A complete technical interview question",
     "difficulty": "easy",
     "topic": "...",
     "expected_concepts": [
@@ -203,7 +230,8 @@ hard
                 "content": prompt
             }
         ],
-        temperature=0.3
+        temperature=0.3,
+        require_question=True
     )
 
 
@@ -328,7 +356,7 @@ ADAPTIVE RULES:
 Return exactly:
 
 {{
-    "question": "...",
+    "question": "A complete technical interview question",
     "difficulty": "easy",
     "topic": "...",
     "expected_concepts": [
@@ -370,7 +398,8 @@ hard
             }
 
         ],
-        temperature=0.3
+        temperature=0.3,
+        require_question=True
     )
 
 # ============================================================
