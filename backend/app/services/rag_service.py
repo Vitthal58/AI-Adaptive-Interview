@@ -303,7 +303,6 @@ def lexical_search(
     collection = get_collection_without_embeddings()
 
     records = collection.get(
-        where={"role": role},
         include=["documents", "metadatas"]
     )
 
@@ -314,6 +313,9 @@ def lexical_search(
         records.get("documents", []),
         records.get("metadatas", [])
     ):
+        if (metadata or {}).get("role") != role:
+            continue
+
         document_terms = set(
             re.findall(r"[a-zA-Z0-9]+", (content or "").lower())
         )
